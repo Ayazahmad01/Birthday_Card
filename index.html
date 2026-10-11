@@ -124,6 +124,24 @@
   .signoff{margin-top:2.4rem;color:var(--muted)}
   .signoff .hand{font-family:var(--hand);font-size:2rem;color:var(--rose);display:block}
 
+  /* ---------- extra motion ---------- */
+  main{position:relative;z-index:1}
+  #hearts{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  #hearts span{position:absolute;bottom:-40px;color:var(--rose);opacity:0;animation:floatup linear infinite}
+  @keyframes floatup{
+    0%{transform:translate(0,0) rotate(0);opacity:0}
+    10%{opacity:.35}
+    90%{opacity:.2}
+    100%{transform:translate(34px,-112vh) rotate(24deg);opacity:0}
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .page.active .stagger > *{animation:rise .8s ease both}
+  .scene:not(.open){animation:bob 4s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .star.found{animation:pop .55s ease}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.7)}100%{transform:scale(1)}}
+  .gift.show h3{animation:bob 3s ease-in-out infinite}
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}
   }
@@ -132,6 +150,7 @@
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<div id="hearts" aria-hidden="true"></div>
 <div class="dots" id="dots" aria-hidden="true"></div>
 
 <main>
@@ -155,13 +174,13 @@
   <!-- ============ PAGE 2: LETTER ============ -->
   <section class="page" aria-label="Letter">
     <div class="wrap">
-      <div class="paper">
+      <div class="paper stagger">
         <p class="greet">Dear <span class="n"></span>,</p>
         <p>I wanted to give you something you could open slowly, so I built you this little corner of the internet.</p>
         <p>You make ordinary days feel like they were arranged just for me. A message from you can change my whole mood, and your laugh is still my favourite sound. Before you, I didn't know I could feel this calm and this excited about the same person.</p>
         <p>On your birthday I wish you good health, quiet mornings, big dreams that actually come true, and people who treat you the way you treat everyone else: kindly. Most of all I wish you a year where you never doubt how much you matter to me.</p>
         <p>Happy birthday, <span class="n"></span>. I'm so glad you were born, and so lucky you're mine.</p>
-        <p class="sign">Always yours,<br><span class="from"></span></p>
+        <p class="sign">Always yours ♥</p>
       </div>
       <div class="nav"><button class="link" data-prev>Back</button><button class="btn" data-next>Next</button></div>
     </div>
@@ -172,7 +191,7 @@
     <div class="wrap">
       <h2 tabindex="-1">Things I don't say enough</h2>
       <p class="lede" style="margin-inline:auto">Five cards. Tap each one to turn it over.</p>
-      <div class="cards">
+      <div class="cards stagger" data-step="0.15">
         <button class="flip" aria-pressed="false"><span class="inner">
           <span class="face front"><b>Your laugh</b><i>Tap to flip</i></span>
           <span class="face back">It's the first thing I want to hear every single day.</span></span></button>
@@ -219,7 +238,7 @@
       </div>
       <p class="signoff" id="signoff" hidden>
         <span class="hand">Happy birthday, <span class="n"></span></span>
-        Made by <span class="from"></span>, with love.
+        Made with love, just for you.
       </p>
       <div class="nav">
         <button class="link" data-prev>Back</button>
@@ -232,11 +251,10 @@
 
 <script>
 /* ==========================================================
-   CHANGE THESE FOUR THINGS AND YOU'RE DONE
+   CHANGE THESE THREE THINGS AND YOU'RE DONE
    ========================================================== */
 const CONFIG = {
   name: "Wafa",          // her name
-  from: "Hasnain",       // your name
   birthdayMonth: 10,     // 1-12  (10 = October)
   birthdayDay: 14        // day of the month
 };
@@ -253,7 +271,6 @@ const STAR_MESSAGES = [
 const STAR_POS = [[50,40],[73,26],[88,48],[50,88],[12,48],[27,26]];
 
 document.querySelectorAll('.n').forEach(e => e.textContent = CONFIG.name);
-document.querySelectorAll('.from').forEach(e => e.textContent = CONFIG.from);
 document.title = "For " + CONFIG.name + " ♥";
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -409,6 +426,25 @@ openBtn.addEventListener('click', () => {
 });
 again.addEventListener('click', () => burst(200));
 replay.addEventListener('click', () => location.reload());
+
+/* ---------- floating hearts + staggered entrances ---------- */
+(function(){
+  document.querySelectorAll('.stagger').forEach(g => {
+    const step = parseFloat(g.dataset.step || '0.4');
+    Array.from(g.children).forEach((c, i) => { c.style.animationDelay = (0.25 + i*step) + 's'; });
+  });
+  if (reduce) return;
+  const box = document.getElementById('hearts');
+  for (let i = 0; i < 14; i++){
+    const s = document.createElement('span');
+    s.textContent = '\u2665';
+    s.style.left = Math.random()*100 + '%';
+    s.style.fontSize = (10 + Math.random()*16) + 'px';
+    s.style.animationDuration = (12 + Math.random()*14) + 's';
+    s.style.animationDelay = (-Math.random()*20) + 's';
+    box.appendChild(s);
+  }
+})();
 </script>
 </body>
 </html>
